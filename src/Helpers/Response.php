@@ -56,7 +56,7 @@ class Response
     self::error($message, 409);
   }
 
-  private static bool $exitDisabled = false;
+  public static bool $exitDisabled = false;
 
   public static function disableExit(): void
   {
