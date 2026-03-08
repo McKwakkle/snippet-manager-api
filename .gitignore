@@ -1,1 +1,5 @@
-/vendor/
+/vendor
+.env
+/config/config.php
+.phpunit.cache
+.phpunit.result.cache
