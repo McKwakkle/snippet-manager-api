@@ -3,8 +3,10 @@ namespace App\Helpers;
 
 use Firebase\JWT\JWT as FirebaseJWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\ExpiredException;
-use Firebase\JWT\SignatureInvalidException;
+// Will maybe remove these at a later stage, decided to not use them
+// but things might change depending on the how the project evolves
+//use Firebase\JWT\ExpiredException;
+//use Firebase\JWT\SignatureInvalidException;
 
 class JWT
 {
