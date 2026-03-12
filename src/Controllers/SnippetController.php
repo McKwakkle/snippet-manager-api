@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Helpers\Response;
 use App\Helpers\Validator;
 use App\Middleware\AuthMiddleware;
+use App\Middleware\OwnershipMiddleware;
 use App\Models\SnippetModel;
 
 class SnippetController
@@ -68,15 +69,14 @@ class SnippetController
 
     $snippet = $this->snippets->findById((int) $params['id']);
 
+    // Check existence first — middleware needs a valid array to work with
     if (!$snippet) {
       Response::notFound('Snippet not found');
       return;
     }
 
-    if ($snippet['user_id'] !== $auth->user_id) {
-      Response::notFound('Snippet not found');
+    if (!OwnershipMiddleware::handle($auth, $snippet))
       return;
-    }
 
     Response::success($snippet);
   }
@@ -89,10 +89,13 @@ class SnippetController
 
     $snippet = $this->snippets->findById((int) $params['id']);
 
-    if (!$snippet || $snippet['user_id'] !== $auth->user_id) {
+    if (!$snippet) {
       Response::notFound('Snippet not found');
       return;
     }
+
+    if (!OwnershipMiddleware::handle($auth, $snippet))
+      return;
 
     $data = $this->getInput();
 
@@ -118,10 +121,13 @@ class SnippetController
 
     $snippet = $this->snippets->findById((int) $params['id']);
 
-    if (!$snippet || $snippet['user_id'] !== $auth->user_id) {
+    if (!$snippet) {
       Response::notFound('Snippet not found');
       return;
     }
+
+    if (!OwnershipMiddleware::handle($auth, $snippet))
+      return;
 
     $this->snippets->delete($snippet['id']);
 

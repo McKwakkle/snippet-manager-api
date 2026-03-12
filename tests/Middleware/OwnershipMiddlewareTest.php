@@ -11,24 +11,23 @@ class OwnershipMiddlewareTest extends TestCase
   public function test_handle_passes_when_user_owns_snippet(): void
   {
     $auth = (object) ['user_id' => 'abc123'];
-    $snippet = (object) ['user_id' => 'abc123'];
+    $snippet = ['user_id' => 'abc123'];
 
-    OwnershipMiddleware::handle($auth, $snippet);
+    $result = OwnershipMiddleware::handle($auth, $snippet);
 
-    $this->assertTrue(true);
+    $this->assertTrue($result);
   }
 
-  public function test_handle_exits_when_user_does_not_own_snippet(): void
+  public function test_handle_fails_when_user_does_not_own_snippet(): void
   {
     $auth = (object) ['user_id' => 'abc123'];
-    $snippet = (object) ['user_id' => 'different_user'];
+    $snippet = ['user_id' => 'different_user'];
 
     ob_start();
-    OwnershipMiddleware::handle($auth, $snippet);
-    $output = ob_get_clean();
+    $result = OwnershipMiddleware::handle($auth, $snippet);
+    $body = json_decode(ob_get_clean(), true);
 
-    $body = json_decode($output, true);
-
+    $this->assertFalse($result);
     $this->assertFalse($body['success']);
     $this->assertEquals('Snippet not found', $body['error']);
   }

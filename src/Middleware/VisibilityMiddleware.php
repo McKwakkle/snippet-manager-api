@@ -6,20 +6,23 @@ use App\Helpers\Response;
 
 class VisibilityMiddleware
 {
-  public static function handle(object $snippet, ?object $auth = null): void
+  public static function handle(array $snippet, ?object $auth = null): bool
   {
-    if ($snippet->visibility === 'public') {
-      return;
+
+    if ($snippet['visibility'] === 'public') {
+      return true;
     }
 
     if ($auth === null) {
       Response::notFound('Snippet not found');
-      return;
+      return false;
     }
 
-    if ($auth->user_id !== $snippet->user_id) {
+    if ($auth->user_id !== $snippet['user_id']) {
       Response::notFound('Snippet not found');
-      return;
+      return false;
     }
+
+    return true;
   }
 }

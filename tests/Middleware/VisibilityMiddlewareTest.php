@@ -8,61 +8,58 @@ use PHPUnit\Framework\TestCase;
 
 class VisibilityMiddlewareTest extends TestCase
 {
-
   public function test_public_snippet_passes_with_no_auth(): void
   {
-    $snippet = (object) ['visibility' => 'public', 'user_id' => 'abc123'];
+    $snippet = ['visibility' => 'public', 'user_id' => 'abc123'];
 
-    VisibilityMiddleware::handle($snippet);
+    $result = VisibilityMiddleware::handle($snippet);
 
-    $this->assertTrue(true);
+    $this->assertTrue($result);
   }
 
   public function test_public_snippet_passes_with_auth(): void
   {
-    $snippet = (object) ['visibility' => 'public', 'user_id' => 'abc123'];
+    $snippet = ['visibility' => 'public', 'user_id' => 'abc123'];
     $auth = (object) ['user_id' => 'different_user'];
 
-    VisibilityMiddleware::handle($snippet, $auth);
+    $result = VisibilityMiddleware::handle($snippet, $auth);
 
-    $this->assertTrue(true);
+    $this->assertTrue($result);
   }
 
   public function test_private_snippet_passes_when_owner_requests_it(): void
   {
-    $snippet = (object) ['visibility' => 'private', 'user_id' => 'abc123'];
+    $snippet = ['visibility' => 'private', 'user_id' => 'abc123'];
     $auth = (object) ['user_id' => 'abc123'];
 
-    VisibilityMiddleware::handle($snippet, $auth);
+    $result = VisibilityMiddleware::handle($snippet, $auth);
 
-    $this->assertTrue(true);
+    $this->assertTrue($result);
   }
 
-  public function test_private_snippet_exits_with_no_auth(): void
+  public function test_private_snippet_fails_with_no_auth(): void
   {
-    $snippet = (object) ['visibility' => 'private', 'user_id' => 'abc123'];
+    $snippet = ['visibility' => 'private', 'user_id' => 'abc123'];
 
     ob_start();
-    VisibilityMiddleware::handle($snippet);
-    $output = ob_get_clean();
+    $result = VisibilityMiddleware::handle($snippet);
+    $body = json_decode(ob_get_clean(), true);
 
-    $body = json_decode($output, true);
-
+    $this->assertFalse($result);
     $this->assertFalse($body['success']);
     $this->assertEquals('Snippet not found', $body['error']);
   }
 
-  public function test_private_snippet_exits_when_non_owner_requests_it(): void
+  public function test_private_snippet_fails_when_non_owner_requests_it(): void
   {
-    $snippet = (object) ['visibility' => 'private', 'user_id' => 'abc123'];
+    $snippet = ['visibility' => 'private', 'user_id' => 'abc123'];
     $auth = (object) ['user_id' => 'different_user'];
 
     ob_start();
-    VisibilityMiddleware::handle($snippet, $auth);
-    $output = ob_get_clean();
+    $result = VisibilityMiddleware::handle($snippet, $auth);
+    $body = json_decode(ob_get_clean(), true);
 
-    $body = json_decode($output, true);
-
+    $this->assertFalse($result);
     $this->assertFalse($body['success']);
     $this->assertEquals('Snippet not found', $body['error']);
   }
