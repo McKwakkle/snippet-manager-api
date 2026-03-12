@@ -27,18 +27,18 @@ class JWT
     return FirebaseJWT::decode($token, new Key($secret, self::$algorithm));
   }
   public static function getTokenFromHeader(): ?string
-{
+  {
     $headers = function_exists('getallheaders') ? \getallheaders() : [];
-    $auth    = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
 
     if (empty($auth)) {
-        $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+      $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     }
 
     if (str_starts_with($auth, 'Bearer ')) {
-        return substr($auth, 7);
+      return substr($auth, 7);
     }
 
     return null;
-}
+  }
 }
