@@ -86,10 +86,16 @@ class UserModel
   public function publicProfile(array $user): array
   {
     return [
+      'id' => $user['id'],
       'username' => $user['username'],
       'display_name' => $user['display_name'],
       'bio' => $user['bio'],
       'created_at' => $user['created_at'],
     ];
+  }
+
+  public function getAll(): array
+  {
+    return $this->db->query('SELECT * FROM users')->fetchAll();
   }
 }

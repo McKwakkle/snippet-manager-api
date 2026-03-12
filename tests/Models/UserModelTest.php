@@ -152,7 +152,8 @@ class UserModelTest extends TestCase
     $public = $this->model->publicProfile($created);
 
     $this->assertArrayNotHasKey('password_hash', $public);
-    $this->assertArrayNotHasKey('id', $public);
+    $this->assertArrayNotHasKey('email', $public);
+    $this->assertArrayHasKey('id', $public);
     $this->assertArrayHasKey('username', $public);
     $this->assertArrayHasKey('display_name', $public);
   }
