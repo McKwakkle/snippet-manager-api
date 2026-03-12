@@ -39,6 +39,38 @@ class Validator
     return $this;
   }
 
+  public function password(string $field): self
+  {
+    if (!isset($this->data[$field])) {
+      return $this;
+    }
+
+    $value = (string) $this->data[$field];
+    $failures = [];
+
+    if (strlen($value) < 8) {
+      $failures[] = "at least 8 characters";
+    }
+
+    if (!preg_match('/[A-Z]/', $value)) {
+      $failures[] = "at least one uppercase letter";
+    }
+
+    if (!preg_match('/[0-9]/', $value)) {
+      $failures[] = "at least one number";
+    }
+
+    if (!preg_match('/[!@#$%^&*]/', $value)) {
+      $failures[] = "at least one symbol (!@#$%^&*)";
+    }
+
+    if (!empty($failures)) {
+      $this->errors[$field] = "{$field} must contain: " . implode(', ', $failures);
+    }
+
+    return $this;
+  }
+
   public function max(string $field, int $max): self
   {
     if (isset($this->data[$field]) && strlen((string) $this->data[$field]) > $max) {

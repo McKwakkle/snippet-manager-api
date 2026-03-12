@@ -39,7 +39,9 @@ class AuthController
       ->required('email')
       ->email('email')
       ->required('password')
-      ->min('password', 8)
+      // password() includes the min 8 check plus complexity rules,
+      // so ->min('password', 8) is no longer needed here
+      ->password('password')
       ->required('password_confirmation')
       ->matches('password', 'password_confirmation');
 
@@ -88,6 +90,8 @@ class AuthController
 
     $user = $this->users->findByEmail($data['email']);
 
+    // Both "user not found" and "wrong password" return the same message —
+    // this prevents attackers from using the response to confirm valid emails
     if (!$user || !password_verify($data['password'], $user['password_hash'])) {
       Response::unauthorized('Invalid email or password');
       return;
@@ -117,7 +121,6 @@ class AuthController
     $user = $this->users->findByEmail($data['email']);
 
     if (!$user) {
-      // Return success regardless to prevent email enumeration
       Response::success(['message' => 'If that email exists, a reset link has been sent']);
       return;
     }
@@ -151,7 +154,8 @@ class AuthController
     $validator = (new Validator($data))
       ->required('token')
       ->required('password')
-      ->min('password', 8)
+      // Same complexity rules apply when setting a new password via reset
+      ->password('password')
       ->required('password_confirmation')
       ->matches('password', 'password_confirmation');
 
@@ -209,6 +213,8 @@ class AuthController
     $data = $this->getInput();
 
     $validator = (new Validator($data))
+      // min 3 ensures display names are meaningful, not just a single character
+      ->min('display_name', 3)
       ->max('display_name', 80)
       ->max('bio', 500);
 

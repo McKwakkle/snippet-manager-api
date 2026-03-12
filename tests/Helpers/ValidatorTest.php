@@ -194,4 +194,58 @@ class ValidatorTest extends TestCase
     $this->assertArrayNotHasKey('email', $validated);
     $this->assertArrayHasKey('username', $validated);
   }
+
+  public function test_password_passes_with_valid_password(): void
+  {
+    $validator = (new Validator(['password' => 'Secret1!']))->password('password');
+
+    $this->assertFalse($validator->fails());
+  }
+
+  public function test_password_fails_when_too_short(): void
+  {
+    $validator = (new Validator(['password' => 'Sh0rt!']))->password('password');
+
+    $this->assertTrue($validator->fails());
+    $this->assertArrayHasKey('password', $validator->errors());
+  }
+
+  public function test_password_fails_without_uppercase(): void
+  {
+    $validator = (new Validator(['password' => 'secret1!']))->password('password');
+
+    $this->assertTrue($validator->fails());
+    $this->assertArrayHasKey('password', $validator->errors());
+  }
+
+  public function test_password_fails_without_number(): void
+  {
+    $validator = (new Validator(['password' => 'Secret!!']))->password('password');
+
+    $this->assertTrue($validator->fails());
+    $this->assertArrayHasKey('password', $validator->errors());
+  }
+
+  public function test_password_fails_without_symbol(): void
+  {
+    $validator = (new Validator(['password' => 'Secret123']))->password('password');
+
+    $this->assertTrue($validator->fails());
+    $this->assertArrayHasKey('password', $validator->errors());
+  }
+
+  public function test_password_skips_validation_when_field_absent(): void
+  {
+    $validator = (new Validator([]))->password('password');
+
+    $this->assertFalse($validator->fails());
+  }
+
+  public function test_password_collects_multiple_failures(): void
+  {
+    $validator = (new Validator(['password' => 'weak']))->password('password');
+
+    $this->assertTrue($validator->fails());
+    $this->assertArrayHasKey('password', $validator->errors());
+  }
 }

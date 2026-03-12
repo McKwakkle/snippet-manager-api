@@ -42,7 +42,7 @@ class AuthControllerTest extends TestCase
   private function createTestUser(
     string $username = 'testuser',
     string $email = 'test@test.com',
-    string $password = 'secret123'
+    string $password = 'Secret123!'
   ): array {
     $user = $this->users->create($username, $email, password_hash($password, PASSWORD_BCRYPT));
     $this->createdUserIds[] = $user['id'];
@@ -54,8 +54,8 @@ class AuthControllerTest extends TestCase
     $this->mockInput([
       'username' => 'newuser',
       'email' => 'new@test.com',
-      'password' => 'secret123',
-      'password_confirmation' => 'secret123',
+      'password' => 'Secret123!',
+      'password_confirmation' => 'Secret123!',
     ]);
 
     ob_start();
@@ -89,8 +89,8 @@ class AuthControllerTest extends TestCase
     $this->mockInput([
       'username' => 'otheruser',
       'email' => 'test@test.com',
-      'password' => 'secret123',
-      'password_confirmation' => 'secret123',
+      'password' => 'Secret123!',
+      'password_confirmation' => 'Secret123!',
     ]);
 
     ob_start();
@@ -108,8 +108,8 @@ class AuthControllerTest extends TestCase
     $this->mockInput([
       'username' => 'testuser',
       'email' => 'other@test.com',
-      'password' => 'secret123',
-      'password_confirmation' => 'secret123',
+      'password' => 'Secret123!',
+      'password_confirmation' => 'Secret123!',
     ]);
 
     ob_start();
@@ -126,7 +126,7 @@ class AuthControllerTest extends TestCase
 
     $this->mockInput([
       'email' => 'test@test.com',
-      'password' => 'secret123',
+      'password' => 'Secret123!',
     ]);
 
     ob_start();
@@ -158,7 +158,7 @@ class AuthControllerTest extends TestCase
   {
     $this->mockInput([
       'email' => 'nobody@test.com',
-      'password' => 'secret123',
+      'password' => 'Secret123!',
     ]);
 
     ob_start();
@@ -223,8 +223,8 @@ class AuthControllerTest extends TestCase
 
     $this->mockInput([
       'token' => $reset['token'],
-      'password' => 'newpassword123',
-      'password_confirmation' => 'newpassword123',
+      'password' => 'Newpassword123!',
+      'password_confirmation' => 'Newpassword123!',
     ]);
 
     ob_start();
@@ -234,15 +234,15 @@ class AuthControllerTest extends TestCase
     $this->assertTrue($body['success']);
 
     $updated = $this->users->findByEmail($user['email']);
-    $this->assertTrue(password_verify('newpassword123', $updated['password_hash']));
+    $this->assertTrue(password_verify('Newpassword123!', $updated['password_hash']));
   }
 
   public function test_reset_password_fails_with_invalid_token(): void
   {
     $this->mockInput([
       'token' => 'invalidtoken',
-      'password' => 'newpassword123',
-      'password_confirmation' => 'newpassword123',
+      'password' => 'Newpassword123!',
+      'password_confirmation' => 'Newpassword123!',
     ]);
 
     ob_start();
