@@ -33,6 +33,15 @@ class Database
     }
   }
 
+  private function __clone()
+  {
+  }
+
+  public function __wakeup(): never
+  {
+    throw new \Exception('Cannot unserialize a singleton.');
+  }
+
   public static function getInstance(): Database
   {
     if (self::$instance === null) {
@@ -40,6 +49,7 @@ class Database
     }
     return self::$instance;
   }
+
   public function getConnection(): PDO
   {
     return $this->connection;

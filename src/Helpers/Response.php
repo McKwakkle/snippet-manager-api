@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 class Response
 {
+  public static bool $exitDisabled = false;
   public static function json(mixed $data, int $status = 200): void
   {
     http_response_code($status);
@@ -12,8 +13,8 @@ class Response
     if (!self::$exitDisabled) {
       exit;
     }
-
   }
+
 
   public static function success(mixed $data = null, int $status = 200): void
   {
@@ -55,9 +56,6 @@ class Response
   {
     self::error($message, 409);
   }
-
-  public static bool $exitDisabled = false;
-
   public static function disableExit(): void
   {
     self::$exitDisabled = true;

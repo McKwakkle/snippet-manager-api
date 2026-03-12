@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at    DATETIME     DEFAULT NOW() ON UPDATE NOW(),
     UNIQUE INDEX idx_username (username),
     UNIQUE INDEX idx_email    (email),
+    UNIQUE INDEX idx_display_name (display_name),
     FULLTEXT  INDEX ft_display_name (display_name)
 );
 

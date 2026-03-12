@@ -71,10 +71,9 @@ class Validator
 
   public function integer(string $field): self
   {
-    if (isset($this->data[$field]) && !filter_var($this->data[$field], FILTER_VALIDATE_INT)) {
+    if (isset($this->data[$field]) && filter_var($this->data[$field], FILTER_VALIDATE_INT) === false) {
       $this->errors[$field] = "{$field} must be an integer";
     }
-
     return $this;
   }
 

@@ -63,7 +63,7 @@ class SnippetModel
     );
 
     if (empty($fields)) {
-      return $this->findById($id);      # code...
+      return $this->findById($id);
     }
 
     $setParts = array_map(fn($key) => "$key =:$key", array_keys($fields));

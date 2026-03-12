@@ -45,6 +45,10 @@ class FeedController
 
     foreach ($snippets as &$snippet) {
       if ($snippet['anonymous']) {
+        // Strip identity fields for anonymous posts.
+        // is_owner is intentionally false here, the feed reflects
+        // the public view. Users can identify their own anonymous
+        // snippets through their personal library (GET /snippets).
         unset($snippet['username']);
         unset($snippet['display_name']);
         unset($snippet['user_id']);
