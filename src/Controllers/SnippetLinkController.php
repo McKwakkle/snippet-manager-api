@@ -7,6 +7,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\OwnershipMiddleware;
 use App\Models\SnippetModel;
 use App\Models\SnippetLinkModel;
+use App\Helpers\Validator;
 
 class SnippetLinkController
 {
@@ -45,7 +46,16 @@ class SnippetLinkController
 
     $data = $this->getInput();
 
-    $linkedSnippet = $this->snippets->findById((int) ($data['linked_snippet_id'] ?? 0));
+    $validator = (new Validator(($data)))
+      ->required('linked_snippet_id')
+      ->integer('linked_snippet_id');
+
+    if ($validator->fails()) {
+      Response::error(json_encode($validator->errors()), 422);
+      return;
+    }
+
+    $linkedSnippet = $this->snippets->findById((int) $data['linked_snippet_id']);
 
     if (!$linkedSnippet) {
       Response::notFound('Linked snippet not found');
