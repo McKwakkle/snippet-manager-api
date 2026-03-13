@@ -66,7 +66,7 @@ class SnippetModel
       return $this->findById($id);
     }
 
-    $setParts = array_map(fn($key) => "$key =:$key", array_keys($fields));
+    $setParts = array_map(fn($key) => "$key = :$key", array_keys($fields));
     $sql = 'UPDATE snippets SET ' . implode(', ', $setParts) . ' WHERE id = :id';
 
     $fields['id'] = $id;
