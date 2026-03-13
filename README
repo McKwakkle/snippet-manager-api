@@ -1,0 +1,248 @@
+# Code Snippet Manager API
+
+A custom-built PHP REST API with no framework, serving as the backend for a personal React application where developers can store, organise, and share code snippets. Snippets can be kept private, made public, or shared anonymously, letting users contribute to the public feed without attaching their identity to a piece of code.
+
+This project also serves as a portfolio piece to demonstrate the ability to architect and build a REST API from first principles, without relying on a framework to handle the underlying mechanics.
+
+---
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
+- [Why No Framework?](#why-no-framework)
+- [API Architecture](#api-architecture)
+- [Key Design Decisions](#key-design-decisions)
+- [Local Setup](#local-setup)
+- [Deployment](#deployment)
+
+---
+
+## Project Overview
+
+The Code Snippet Manager API allows authenticated users to:
+
+- Save and manage their own library of code snippets with titles, 
+  descriptions, languages, and tags
+- Control visibility per snippet, private (personal library only), 
+  public (visible to all), or anonymous (public but with identity hidden)
+- Follow other users and browse a personalised feed of public snippets
+- Link related snippets together for reference
+- Manage their profile with a unique display name and bio
+
+Authentication is handled via JWT tokens. The React frontend consumes 
+this API to provide the full user experience.
+
+---
+
+## Tech Stack
+
+**Backend:** PHP 8.x (no framework), custom router, middleware, 
+and validation layer
+
+**Database:** MySQL (local development via XAMPP) / Supabase Postgres (production)
+
+**Authentication:** JWT (JSON Web Tokens) via firebase/php-jwt
+
+**Testing:** PHPUnit 13
+
+**Hosting:** Render (API), Vercel (React frontend)
+
+---
+
+## Why No Framework?
+
+Most production PHP projects would use a framework like Laravel or Slim, and for good reason, they provide battle-tested solutions for routing, validation, authentication, and database access, which allows teams to move quickly without reinventing the wheel.
+
+For this project, however, the choice to build without a framework was deliberate. As a personal project with no time constraints, it was both an opportunity and genuinely enjoyable to build everything from scratch, the router, middleware pipeline, validator, JWT helper, and response layer are all custom implementations. This demonstrates an understanding of what a framework is actually doing under the hood, rather than just knowing how to use one. The knowledge built here transfers to any framework or language, because the underlying concepts are the same.
+
+The trade-off is real, it takes longer and every security decision has to be made consciously rather than inherited from a hardened library, for a portfolio project, this deliberateness was the point.
+
+---
+
+## API Architecture
+
+The API exposes 25 endpoints across six groups. All endpoints except 
+those in the Auth group require a valid JWT token passed as a 
+`Authorization: Bearer <token>` header.
+
+**Auth** — register, login, forgot password, verify reset token, 
+reset password, get profile, update profile
+
+**My Snippets** — full CRUD for the authenticated user's own snippets
+
+**Public Feed** — browse public snippets from all users, browse snippets from followed users, view a single public snippet
+
+**Snippet Links** — link related snippets together
+
+**Tags** — create and manage tags for organising snippets
+
+**Users & Follows** — search users by display name, follow/unfollow, 
+view followers and following lists
+
+### Middleware
+
+Every request that requires authentication passes through three 
+middleware layers in sequence.
+
+`AuthMiddleware` validates the JWT token and extracts the authenticated user. If the token is missing or invalid, the request is rejected with a 401 before it reaches the controller.
+
+`OwnershipMiddleware` confirms that the authenticated user owns the 
+resource they are trying to modify. If they do not, a 404 is returned 
+rather than a 403, this is intentional and explained in the design 
+decisions below.
+
+`VisibilityMiddleware` governs access to public feed endpoints. It 
+ensures only public snippets are surfaced in the feed, regardless of 
+who is requesting them.
+
+---
+
+## Key Design Decisions
+
+**Private snippets return 404, not 403**
+
+When a user requests a snippet they don't own, the API returns 404 
+rather than 403. A 403 would confirm that the resource exists but is 
+forbidden, which leaks information. A 404 reveals nothing, the snippet simply does not exist as far as the requester is concerned. This is the same principle used by GitHub when you try to access a private repository you don't have permission to view.
+
+**Anonymous snippets and `is_owner`**
+
+When a snippet is marked anonymous, the author's username and display 
+name are stripped from the public feed response. The `is_owner` flag, 
+which tells the frontend whether the current user authored the snippet, is intentionally always `false` for anonymous snippets, even for the author themselves when browsing the public feed.
+
+This is by design: the feed reflects the public view, and the author chose anonymity. Users can identify and manage their own anonymous snippets through the personal library endpoint (`GET /snippets`), which is private and authenticated.
+
+**Enumeration protection**
+
+Both the login endpoint and the forgot password endpoint are designed 
+to prevent user enumeration attacks. At login, whether the email doesn't exist or the password is wrong, the response is always the same, "Invalid email or password", with no way to distinguish which condition fired. At forgot password, the same message is returned whether the email exists in the system or not. This prevents an attacker from using your API to build a list of valid registered email addresses.
+
+**Password complexity**
+
+Passwords are enforced to meet the following requirements: minimum 8 
+characters, at least one uppercase letter, at least one number, and at least one symbol from the set `!@#$%^&*`. These rules apply at both registration and password reset. If multiple requirements fail, all failures are reported in a single response so the user can correct everything at once rather than discovering issues one at a time.
+
+**Password reset tokens**
+
+Reset tokens are generated using `bin2hex(random_bytes(32))`, which 
+produces a cryptographically secure 64-character hex string. Tokens 
+expire after one hour and are marked as used rather than deleted, which preserves an audit trail of reset activity.
+
+---
+
+## Local Setup
+
+### Prerequisites
+
+Before cloning the project, make sure you have the following installed.
+
+**PHP 8.x** — Download from [php.net](https://www.php.net/downloads). 
+On Windows, download the Non Thread Safe zip and add the extracted 
+folder to your system PATH so you can run `php` from the terminal.
+
+**Composer** — The PHP dependency manager. Download and follow 
+the instructions at [getcomposer.org](https://getcomposer.org/download/).
+
+**XAMPP** — Used for MySQL and phpMyAdmin locally. Download from 
+[apachefriends.org](https://www.apachefriends.org/). You only need to 
+run the MySQL module, Apache is not required for the API itself.
+
+---
+
+### Installation
+
+Clone the repository and install dependencies:
+```bash
+git clone https://github.com/McKwakkle/snippet-manager-api.git
+cd snippet-manager-api
+composer install
+```
+
+---
+
+### Environment Configuration
+
+Copy the example environment file and rename it:
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your values. The most important value to set is `JWT_SECRET`. Generate a secure 32-byte secret by running the following command in your terminal:
+```bash
+php -r "echo bin2hex(random_bytes(32));"
+```
+
+Copy the output and paste it as the value for `JWT_SECRET` in your 
+`.env` file. Never commit your `.env` file or share this value, 
+the `.gitignore` already excludes it.
+
+---
+
+### Database Setup
+
+Start XAMPP and ensure the MySQL module is running. Open phpMyAdmin 
+by navigating to `http://localhost/phpmyadmin` in your browser.
+
+Create a new database. Click **New** in the left sidebar, name it 
+`snippet_manager`, set the collation to `utf8mb4_unicode_ci`, and click 
+**Create**.
+
+Import the schema by selecting your new database from the left sidebar, clicking the **Import** tab at the top, choosing the file 
+`src/database/migrations.sql` from the project, and clicking **Go**. This will create all seven tables with the correct indexes and foreign keys.
+
+Update your `.env` file with your database credentials:
+```
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=snippet_manager
+DB_USER=root
+DB_PASS=
+```
+
+---
+
+### Running the API
+
+Start the PHP development server from the project root:
+```bash
+php -S localhost:8000 -t public
+```
+
+The API will be available at `http://localhost:8000`.
+
+---
+
+### Running Tests
+```bash
+composer test
+```
+
+---
+
+## Deployment
+
+**This API cannot be deployed to GitHub Pages.** GitHub Pages serves 
+static files only and has no ability to execute PHP. The API requires 
+a server environment that runs PHP and connects to a database.
+
+### Backend — Render
+
+The API is deployed to [Render](https://render.com) as a web service. 
+When setting up the service, set the root directory to `public` and 
+configure the following environment variables in the Render dashboard, do not use your local `.env` values in production.
+
+Generate a fresh `JWT_SECRET` for production:
+```bash
+php -r "echo bin2hex(random_bytes(32));"
+```
+
+Never reuse the secret from your local `.env` file in production.
+
+### Database — Supabase
+
+The production database is hosted on 
+[Supabase](https://supabase.com), which provides a free-tier Postgres 
+instance. After creating a project in Supabase, navigate to the SQL 
+editor and run the contents of `src/database/migrations.sql` to create the schema. Then copy the connection string from the Supabase dashboard into your Render environment variables.
