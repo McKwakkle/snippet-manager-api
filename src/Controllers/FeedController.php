@@ -24,12 +24,7 @@ class FeedController
     $snippets = $this->snippets->getPublic();
 
     foreach ($snippets as &$snippet) {
-      if ($snippet['anonymous']) {
-        unset($snippet['username']);
-        unset($snippet['display_name']);
-        unset($snippet['user_id']);
-      }
-      $snippet['is_owner'] = ($snippet['user_id'] ?? null) === $auth->user_id;
+      $snippet = $this->applyAnonymousRules($snippet, $auth);
     }
 
     Response::success($snippets);
@@ -44,16 +39,7 @@ class FeedController
     $snippets = $this->snippets->getByFollowing($auth->user_id);
 
     foreach ($snippets as &$snippet) {
-      if ($snippet['anonymous']) {
-        // Strip identity fields for anonymous posts.
-        // is_owner is intentionally false here, the feed reflects
-        // the public view. Users can identify their own anonymous
-        // snippets through their personal library (GET /snippets).
-        unset($snippet['username']);
-        unset($snippet['display_name']);
-        unset($snippet['user_id']);
-      }
-      $snippet['is_owner'] = ($snippet['user_id'] ?? null) === $auth->user_id;
+      $snippet = $this->applyAnonymousRules($snippet, $auth);
     }
 
     Response::success($snippets);
@@ -79,5 +65,18 @@ class FeedController
     $snippet['is_owner'] = ($snippet['user_id'] ?? null) === $auth->user_id;
 
     Response::success($snippet);
+  }
+
+  private function applyAnonymousRules(array $snippet, object $auth): array
+  {
+    if ($snippet['anonymous']) {
+      unset($snippet['username']);
+      unset($snippet['display_name']);
+      unset($snippet['user_id']);
+    }
+
+    $snippet['is_owner'] = ($snippet['user_id'] ?? null) === $auth->user_id;
+
+    return $snippet;
   }
 }
