@@ -214,6 +214,20 @@ The API will be available at `http://localhost:8000`.
 
 ---
 
+### Password Reset — Local Development Note
+
+When running the API locally, the `POST /auth/forgot-password` endpoint returns an additional `debug_token` field in the response body:
+```json
+{
+  "message": "If that email is registered, a reset link has been sent.",
+  "debug_token": "a3f9c2..."
+}
+```
+
+This exists because local development has no email service configured. Rather than requiring you to set up something like SendGrid just to test the reset flow, the token is surfaced directly in the response so you can copy it and immediately pass it to `GET /auth/verify-reset-token/{token}` and then `POST /auth/reset-password`.
+
+This field is removed entirely before production deployment. In production, the token is delivered privately to the user's inbox and never appears in the API response, which is the correct behaviour and the whole point of the security model.
+
 ### Running Tests
 ```bash
 composer test
