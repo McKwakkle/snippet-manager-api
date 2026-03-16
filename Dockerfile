@@ -6,8 +6,7 @@ RUN apt-get update && apt-get install -y libpq-dev libzip-dev zip unzip git \
 RUN docker-php-ext-install pdo pgsql pdo_pgsql zip
 
 RUN a2enmod rewrite
-
-RUN ls /etc/apache2/mods-enabled/ | grep -i php || echo "No PHP module found in mods-enabled"
+RUN a2enmod php
 
 COPY apache.conf /etc/apache2/sites-available/snippet-manager-api.conf
 RUN a2ensite snippet-manager-api.conf && a2dissite 000-default.conf
