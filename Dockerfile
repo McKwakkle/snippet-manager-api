@@ -6,7 +6,9 @@ RUN apt-get update && apt-get install -y libpq-dev libzip-dev zip unzip git \
 RUN docker-php-ext-install pdo pgsql pdo_pgsql zip
 
 RUN a2enmod rewrite php
-RUN ls /etc/apache2/mods-enabled/ | grep -i php
+RUN echo '<FilesMatch \.php$>\n    SetHandler application/x-httpd-php\n</FilesMatch>' \
+    > /etc/apache2/conf-available/php-handler.conf \
+    && a2enconf php-handler
 
 COPY apache.conf /etc/apache2/sites-available/snippet-manager-api.conf
 RUN a2ensite snippet-manager-api.conf && a2dissite 000-default.conf
