@@ -1,9 +1,9 @@
 FROM php:8.2-apache
 
-RUN apt-get update && apt-get install -y libpq-dev \
+RUN apt-get update && apt-get install -y libpq-dev zip unzip git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo pgsql pdo_pgsql
+RUN docker-php-ext-install pdo pgsql pdo_pgsql zip
 
 RUN a2enmod rewrite
 
