@@ -18,7 +18,9 @@ class Database
     $user = $_ENV['DB_USER'];
     $pass = $_ENV['DB_PASS'];
 
-    $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
+    // Using pgsql driver for Supabase (Postgres) in production.
+    // For local MySQL development, change pgsql: to mysql: and append ;charset=utf8mb4
+    $dsn = "pgsql:host={$host};port={$port};dbname={$name}";
 
     $options = [
       PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
