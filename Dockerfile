@@ -7,7 +7,7 @@ RUN docker-php-ext-install pdo pgsql pdo_pgsql zip
 
 RUN a2enmod rewrite
 
-RUN apache2ctl -M 2>/dev/null | grep -i php || echo "No PHP module found in active modules"
+RUN ls /etc/apache2/mods-enabled/ | grep -i php || echo "No PHP module found in mods-enabled"
 
 COPY apache.conf /etc/apache2/sites-available/snippet-manager-api.conf
 RUN a2ensite snippet-manager-api.conf && a2dissite 000-default.conf
