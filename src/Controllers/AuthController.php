@@ -127,10 +127,11 @@ class AuthController
 
     $reset = $this->resets->create($data['email']);
 
-    // TODO: Send email in production. Returning token directly for development.
+    // TODO: Integrate an email service here (e.g. SendGrid, Mailgun)
+    // to dispatch a password reset email containing $reset['token'].
+    // The token must never be returned in the API response in production.
     Response::success([
       'message' => 'If that email exists, a reset link has been sent',
-      'debug_token' => $reset['token'],
     ]);
   }
 
