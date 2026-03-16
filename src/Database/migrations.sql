@@ -1,3 +1,5 @@
+-- Some changes will need to be made to get this to work on Supabase
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
     id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
