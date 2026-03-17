@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-ARG CACHE_BUST=3
+ARG CACHE_BUST=4
 
 RUN apt-get update && apt-get install -y libpq-dev libzip-dev zip unzip git \
     && rm -rf /var/lib/apt/lists/*
