@@ -22,4 +22,4 @@ RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["php", "-S", "0.0.0.0:80", "-t", "public", "public/index.php"]
