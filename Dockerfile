@@ -1,16 +1,11 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-ARG CACHE_BUST=4
+ARG CACHE_BUST=5
 
 RUN apt-get update && apt-get install -y libpq-dev libzip-dev zip unzip git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pdo pgsql pdo_pgsql zip
-
-RUN a2enmod rewrite
-
-COPY apache.conf /etc/apache2/sites-available/snippet-manager-api.conf
-RUN a2ensite snippet-manager-api.conf && a2dissite 000-default.conf
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -22,4 +17,4 @@ RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 80
 
-CMD ["php", "-S", "0.0.0.0:80", "-t", "public", "public/index.php"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-80} -t public router.php"]
